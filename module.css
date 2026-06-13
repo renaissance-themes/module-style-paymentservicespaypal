@@ -1,0 +1,508 @@
+/* Vanilla/blank: Magento_PaymentServicesPaypal module CSS.
+   Payment Services (the hosted PayPal integration): the checkout
+   payment-method chrome (type icons, the hosted card form's grid + lock
+   glyph), the smart-button containers (PayPal / Apple Pay / Google Pay) on
+   minicart, cart summary and PDP, the Pay Later message, and the
+   paymentservicespaypal/smartbuttons/review "Review Order" page.
+
+   Ported from the MODULE-level vendor/magento/module-payment-services-paypal
+   view/frontend/web/css/source/_module.less (the module/_billing, _review,
+   _mini-cart, _pay-later, _apple-pay, _google-pay partials) against the
+   COMPILED pub/static/frontend/Magento/blank css (styles-m + styles-l).
+
+   What is CONSUMED, not re-implemented:
+   - .block-title chrome on the review page is the lib block component
+     (blank .abs-account-blocks); only the box-title / action extras here.
+   - The review block's primary action is the SECONDARY-grey button (blank
+     .abs-revert-secondary-color), expressed as lib button component tokens.
+   - The "Place Order" CTA is the LARGE button tier (blank .abs-button-l),
+     applied explicitly via the --button-*-l component tokens (not automatic).
+   - Field labels / controls / validation ride the lib forms component; the
+     hosted-field iframe boxes (.card-field) only get their border box here.
+   - Chevrons (tax-total toggle, discount collapsible) are the masked lib
+     --icon-down / --icon-up tokens, not the icon font.
+   - The card-form lock glyph is luma-icons \e629 in the source (a font
+     blank never loads, so stock blank renders tofu); ported as a masked
+     --icon-lock token extracted from Luma-Icons.woff into web/icons/lock.svg
+     (ink at the source's 18px font = 13.5x18px).
+
+   blank's clearfix extends (.abs-add-clearfix-desktop on the review
+   block-content / discount / order-review-form) are float leftovers and are
+   dropped; the desktop address/method columns are a flex row and the
+   order-review-form primary right-aligns with margin-inline-start:auto instead of
+   float:right. The desktop .magento-payments-review-discount .block
+   .title::after icon-font tweak is dead in blank (nothing generates that
+   ::after; the accordion title is the discount container's own > .title)
+   and is not ported. */
+@layer modules {
+
+  /* ===== checkout payment method chrome ================================= */
+
+  .payment-method {
+    & .flex-center {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    & .payment-type-icon {
+      height: 4rem; /* 40px */
+    }
+  }
+
+  /* ===== the hosted card form =========================================== */
+
+  .card-grid {
+    display: grid;
+  }
+
+  .card-aux {
+    gap: var(--indent-base); /* 20px */
+    grid-template-columns: minmax(auto, 40rem); /* 400px */
+
+    & .actions-toolbar {
+      justify-self: start;
+    }
+  }
+
+  .card-container {
+    margin-block-start: var(--indent-base); /* 20px */
+    align-items: center;
+
+    /* number on its own row, expiration + cvv side by side */
+    & .card-layout {
+      display: grid;
+      grid-template-areas:
+        'card-number-field-area card-number-field-area'
+        'expiration-date-field-area cvv-field-area';
+      grid-template-columns: repeat(2, minmax(0, 1fr)); /* hosted field iframes; minmax(0) is the house fr guard */
+      column-gap: 1rem; /* 10px */
+      row-gap: 1rem;
+      max-width: 40rem; /* 400px */
+
+      & .card-number-field-area {
+        grid-area: card-number-field-area;
+      }
+
+      & .expiration-date-field-area {
+        grid-area: expiration-date-field-area;
+      }
+
+      & .cvv-field-area {
+        grid-area: cvv-field-area;
+      }
+
+      /* the "secure" lock sits right of its row (row-reverse) */
+      & .display-lock {
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: center;
+
+        & .lock-icon::before {
+          content: '';
+          display: inline-block;
+          width: 1.4rem; /* luma \e629 ink at 18px font: 13.5px wide */
+          height: 1.8rem; /* 18px tall */
+          vertical-align: middle;
+          background-color: var(--color-gray-light2); /* #bbb */
+          -webkit-mask: var(--icon-lock) center / contain no-repeat;
+                  mask: var(--icon-lock) center / contain no-repeat;
+        }
+
+        & .lock-icon:hover::before {
+          background-color: var(--color-gray46); /* #757575 */
+        }
+      }
+    }
+
+    & .field {
+      /* a hosted field flagged invalid (blank
+         @checkout-field-validation__border-color) */
+      & div.error {
+        border-color: var(--form-element-validation-border-error); /* #ed8380 */
+      }
+
+      & .label {
+        display: block;
+        font-weight: var(--font-weight-semibold); /* 600 */
+      }
+
+      /* the hosted-iframe control box */
+      & .card-field {
+        border: 1px solid var(--color-gray76); /* #c2c2c2 */
+        height: 3.2rem; /* 32px */
+        padding: 0.8rem 1.5rem; /* 8px 15px */
+      }
+
+      & .field-wrapper {
+        position: relative;
+
+        & .field-tooltip {
+          cursor: pointer;
+          position: absolute;
+          inset-inline-end: 1.5rem; /* 15px */
+          inset-block-start: 1rem; /* 10px */
+        }
+      }
+    }
+  }
+
+  /* the SDK's page loader overlays the checkout */
+  .checkout-index-index > .loading-mask {
+    z-index: 999;
+  }
+
+  /* ===== smart-button containers ======================================== */
+
+  .block-minicart .block-content > .actions .smart-buttons {
+    margin-block-start: 1.5rem; /* 15px */
+  }
+
+  .smart-buttons > div > div {
+    vertical-align: bottom;
+  }
+
+  .pay-later-message {
+    margin-block-start: var(--indent-s); /* 10px */
+  }
+
+  .apple-pay {
+    margin-block-start: 1.4rem; /* 14px */
+  }
+
+  .cart-summary .apple-pay {
+    margin-block-start: 1.1rem; /* 11px */
+  }
+
+  .google-pay {
+    margin-block-start: 1.4rem; /* 14px */
+
+    /* the SDK button carries its art as a background image */
+    & button {
+      background-origin: content-box;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      border: 0;
+    }
+  }
+
+  .cart-summary .google-pay {
+    margin-block-end: 1.4rem; /* 14px */
+  }
+
+  /* ===== the Review Order page ========================================== */
+
+  /* blank .abs-account-blocks: the block-title margin and its strong's
+     18px/300 skin come from the lib block component; only the extras here. */
+  .magento-payments-review .block {
+    & .block-title > .action {
+      margin-inline-start: 1.5rem; /* 15px */
+    }
+
+    & .box-title {
+      display: inline-block;
+      margin-block: 0 var(--indent-xs); /* 5px */
+      margin-inline: 0;
+
+      & > span {
+        /* .lib-heading(h4) */
+        font-size: var(--h4-font-size); /* 14px */
+        font-weight: var(--h4-font-weight); /* 700 */
+        line-height: var(--heading-line-height-base); /* 1.1 */
+      }
+
+      & > .action {
+        font-weight: var(--font-weight-regular); /* 400 */
+        margin-inline-start: var(--indent-s); /* 10px */
+      }
+    }
+
+    & .block-content {
+      & p:last-child {
+        margin-block-end: 0;
+      }
+
+      & .box {
+        margin-block-end: var(--indent-base); /* 20px */
+      }
+    }
+
+    /* the block's primary action is the SECONDARY-grey button (blank
+       .abs-revert-secondary-color), as lib button component tokens */
+    & .actions-toolbar .action.primary {
+      --button-primary-color: var(--color-primary); /* #333 */
+      --button-primary-background: var(--color-gray95); /* #f2f2f2 */
+      --button-primary-border-color: var(--color-gray-darken2); /* #cdcdcd */
+      --button-primary-hover-color: var(--color-gray-darken3); /* #555 */
+      --button-primary-hover-background: var(--color-gray-darken1); /* #e2e2e2 */
+      --button-primary-hover-border-color: var(--color-gray-darken2); /* #cdcdcd */
+      --button-primary-active-color: var(--color-primary); /* #333 */
+      --button-primary-active-background: var(--color-gray-darken1); /* #e2e2e2 */
+      --button-primary-active-border-color: var(--color-gray-darken2); /* #cdcdcd */
+    }
+  }
+
+  .magento-payments-review .actions-toolbar {
+    margin-block-start: var(--indent-s); /* 10px */
+  }
+
+  /* the page title row: a 24px light strong plus the "Edit" action */
+  .magento-payments-review .magento-payments-review-title {
+    padding-block: 0 var(--indent-s); /* 10px */
+    padding-inline: 0;
+
+    & > strong {
+      font-size: 2.4rem; /* .lib-font-size(24) */
+      font-weight: var(--font-weight-light); /* 300 */
+    }
+
+    & .action {
+      display: inline-block;
+      margin-block: 1.2rem 0;
+      margin-inline: var(--indent-l) 0; /* 12px 0 0 30px */
+    }
+  }
+
+  /* the items table; column skins ride the lib tables component */
+  .magento-payments-review .table-magento-payments-review-items {
+    & .col.name {
+      padding-block-start: 1.6rem; /* 16px */
+    }
+
+    & .col.qty {
+      text-align: center;
+    }
+
+    /* the incl/excl tax toggle (blank .abs-tax-total): a clickable amount
+       with a chevron; down when collapsed, up when -expanded. blank draws
+       icon-font \e622 at 26px (visible ink ~ 8.4x4.8px), absolute at
+       right -10px / top 3px. */
+    & .cart-tax-total {
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      padding-inline-end: 1.2rem; /* 12px */
+      text-decoration: none;
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset-inline-end: -1rem; /* -10px */
+        inset-block-start: 0.3rem; /* 3px */
+        width: 0.9rem;
+        height: 0.5rem;
+        background-color: currentColor;
+        -webkit-mask: var(--icon-down) center / contain no-repeat;
+                mask: var(--icon-down) center / contain no-repeat;
+      }
+    }
+
+    & .cart-tax-total-expanded::after {
+      -webkit-mask-image: var(--icon-up);
+              mask-image: var(--icon-up);
+    }
+  }
+
+  /* item options render as an inline "label: value" pair list */
+  .magento-payments-review .item-options {
+    & dt {
+      display: inline-block;
+
+      &::after {
+        content: ': ';
+      }
+    }
+
+    & dd {
+      margin: 0;
+    }
+  }
+
+  /* the payment-source logo on the payment block */
+  .magento-payments-review .payment-source-logo {
+    margin-block-start: var(--indent-s); /* 10px */
+
+    &[alt='googlepay'],
+    &[alt='applepay'] {
+      height: 4rem; /* 40px */
+    }
+
+    &[alt='paypal'],
+    &[alt='paylater'] {
+      height: 2.6rem; /* 26px */
+    }
+
+    &[alt='venmo'] {
+      height: 2rem; /* 20px */
+    }
+  }
+
+  /* ===== review page discount collapsible =============================== */
+
+  /* blank .abs-discount-block on the container itself: a clickable > .title
+     with a chevron, > .content hidden until .active (same pattern as the
+     cart-summary port in Magento_Checkout). */
+  .magento-payments-review-discount {
+    border-block-end: var(--border-width-base) solid var(--color-gray82); /* 1px #d1d1d1 (blank theme @border-color__base) */
+    margin-block: 0 var(--indent-xl); /* 40px */
+    margin-inline: 0;
+    padding-block: var(--indent-s) 0; /* 10px 0 0 */
+    padding-inline: 0;
+
+    & > .title {
+      position: relative;
+      display: block;
+      margin-block-end: 0;
+      padding-block: 7px;
+      padding-inline: var(--indent-xs) var(--indent-l); /* blank 7px 30px 7px 5px */
+      border-block-start: var(--border-width-base) solid var(--color-gray82); /* #d1d1d1 */
+      cursor: pointer;
+      font-weight: var(--font-weight-semibold); /* 600 */
+      text-decoration: none;
+      overflow: hidden;
+
+      /* the collapse chevron (blank icon-font @icon-down / @icon-up at 30px) */
+      &::after {
+        content: '';
+        position: absolute;
+        inset-block-start: 50%;
+        inset-inline-end: var(--indent-xs);
+        width: 1.4rem;
+        height: 0.8rem;
+        margin-block-start: -0.4rem;
+        background-color: currentColor;
+        -webkit-mask: var(--icon-down) center / contain no-repeat;
+                mask: var(--icon-down) center / contain no-repeat;
+      }
+    }
+
+    & > .content {
+      display: none;
+    }
+
+    &.active > .title::after {
+      -webkit-mask-image: var(--icon-up);
+              mask-image: var(--icon-up);
+    }
+
+    &.active > .content {
+      display: block;
+    }
+  }
+
+  /* blank scopes the title's 18px/400 strong to the main column */
+  .column.main .magento-payments-review-discount > .title strong {
+    font-size: 1.8rem;
+    font-weight: var(--font-weight-regular); /* 400 */
+  }
+
+  /* ===== order review form (Place Order) ================================ */
+
+  /* the CTA is the LARGE button tier (blank .abs-button-l, NOT automatic) */
+  .order-review-form .action.primary {
+    padding: var(--button-padding-l); /* 14px 17px */
+    font-size: var(--button-font-size-l); /* 18px */
+    line-height: var(--button-line-height-l); /* 22px */
+  }
+
+  /* ===== mobile ========================================================= */
+
+  @media (--screen-s-max) {
+    .table-magento-payments-review-items {
+      & .col.subtotal {
+        text-align: start;
+      }
+
+      & .product-item-name {
+        display: inline-block;
+      }
+    }
+
+    .cart-summary .apple-pay {
+      margin-block-start: 1.4rem; /* 14px */
+    }
+  }
+
+  /* ===== desktop ======================================================== */
+
+  @media (--screen-m) {
+    .magento-payments-review {
+      & .magento-payments-review-title {
+        border-block-end: var(--border-width-base) solid var(--color-gray82); /* 1px #d1d1d1 */
+      }
+
+      /* shipping address / shipping method / billing address go 3-up
+         (blank floats 34% + 33% + 33%; flex row, widths preserved). Any
+         other box keeps the full row, like blank's unfloated boxes. */
+      & .block-content {
+        display: flex;
+        flex-wrap: wrap;
+
+        & .box {
+          width: 100%;
+        }
+
+        & .box-order-shipping-address,
+        & .box-order-shipping-method,
+        & .box-order-shipping-method + .box-order-billing-address {
+          box-sizing: border-box;
+          width: 33%;
+        }
+
+        & .box-order-shipping-address {
+          padding: 0 5%;
+          width: 34%;
+        }
+      }
+
+      & .table-magento-payments-review-items {
+        & .col.price,
+        & .col.qty {
+          text-align: center;
+        }
+
+        & .col.item {
+          width: 60%;
+        }
+      }
+
+      & .col.subtotal,
+      & .mark,
+      & .amount {
+        text-align: end;
+      }
+    }
+
+    /* blank .abs-reset-left-margin-desktop: drop the lib's 25.8% form-column
+       toolbar indent on the review page */
+    .column.main .magento-payments-review .actions-toolbar {
+      margin-inline-start: 0;
+    }
+
+    /* discount collapsible, desktop spacing */
+    .magento-payments-review-discount {
+      border-block-start: var(--border-width-base) solid var(--color-gray82); /* 1px #d1d1d1 */
+
+      & .block {
+        margin-block-end: 1.5rem; /* @indent__base - @indent__xs, 15px */
+      }
+
+      & .block .content {
+        padding-block-end: 0;
+      }
+    }
+
+    /* the Place Order button rides the toolbar's right edge (blank floats
+       > .primary right; margin-inline-start:auto in the lib's flex toolbar) */
+    .order-review-form {
+      & .actions-toolbar > .primary {
+        margin-inline-start: auto;
+      }
+
+      & .action.primary {
+        margin-inline-end: 0;
+      }
+    }
+  }
+}
